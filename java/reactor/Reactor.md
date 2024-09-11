@@ -85,3 +85,20 @@ Scheduler의 종류
 6. Schedulers.fromExecutorService(ExecutorService)
    - custom executorservice를 사용해 Scheduler를 생성할 수 있음
    - 의미있는 식별자를 제공하기 때문에 Metric에서 주로 사용 됨
+
+### Context
+reactive stream 안에서 상태나 데이터를 전달 할 수 있는 불변 객체  
+비동기 특성에 맞춰진 thread-local의 느낌으로, Context는 각 리액티브 체인 내에서 상태를 저장하고 가져오는데 사용 됨  
+
+Context에 값을 저장하기 위해서는 **contextWrite()**를 사용   
+Context의 값을 읽어오기 위해서는 읽기 전용 뷰인 **ContextView**를 사용  
+_ContextView는 Reactor Sequence에서 deferContextual() / transformDeferredContextual()을 통해서 제공됨_
+
+Context는 체인의 맨 아래에서부터 위로 전파됨  
+-> Operator 체인에서 Context read 메서드가 Context write 메서드 밑에 있을 경우에는 write된 값을 read 할 수 없음
+
+주요 특징 
+1. 불변성 : Context는 한번 생성되면 변경할 수 없다. 새로운 값을 추가하거나 변경하려면 항상 새로운 Context를 생성해야 함 
+2. 데이터 저장 : Context는 (key, value)로 저장한다. 따라서 필요한 데이터를 키를 통해 쉽게 가져올 수 있음
+3. 범위 제한 : Context는 subscribe 시점에 설정되어 해당 구독 안에서만 유지됨 (같은 리액티브 체인 내에서만 유효)
+4. 연산 간 전파 : Context는 리액티브 체인 내에서 자동으로 전달되며, 이를 통해 연산들 사이에서 상태를 공유할 수 있음
